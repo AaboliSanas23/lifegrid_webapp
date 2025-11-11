@@ -3041,69 +3041,69 @@ const TaskFormModal = ({ isOpen, onClose, onAddTask }) => {
 };
 
 // Reminder Notification Component
-const ReminderNotification = ({ reminders, onDismiss, onSnooze }) => {
-  return (
-    <motion.div
-      className="reminder-notification-container"
-      initial={{ opacity: 0, y: -50, scale: 0.8 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -50, scale: 0.8 }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-    >
-      <div className="reminder-header">
-        <h3>🔔 Task Reminders</h3>
-        <span className="reminder-count">{reminders.length} reminder(s)</span>
-      </div>
+// const ReminderNotification = ({ reminders, onDismiss, onSnooze }) => {
+//   return (
+//     <motion.div
+//       className="reminder-notification-container"
+//       initial={{ opacity: 0, y: -50, scale: 0.8 }}
+//       animate={{ opacity: 1, y: 0, scale: 1 }}
+//       exit={{ opacity: 0, y: -50, scale: 0.8 }}
+//       transition={{ type: "spring", stiffness: 300, damping: 25 }}
+//     >
+//       <div className="reminder-header">
+//         <h3>🔔 Task Reminders</h3>
+//         <span className="reminder-count">{reminders.length} reminder(s)</span>
+//       </div>
       
-      <div className="reminder-list">
-        {reminders.map((reminder, index) => (
-          <motion.div
-            key={reminder.task.id}
-            className="reminder-item"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <div className="reminder-content">
-              <div className="reminder-task">{reminder.task.taskName}</div>
-              <div className="reminder-due">Due: {reminder.formattedDueDate}</div>
-              <div className="reminder-time">Time: {reminder.task.startTime} - {reminder.task.endTime}</div>
-            </div>
-            <div className="reminder-actions">
-              <motion.button
-                onClick={() => onSnooze(reminder.task.id)}
-                className="snooze-btn"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Snooze (1h)
-              </motion.button>
-              <motion.button
-                onClick={() => onDismiss(reminder.task.id)}
-                className="dismiss-btn"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Dismiss
-              </motion.button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+//       <div className="reminder-list">
+//         {reminders.map((reminder, index) => (
+//           <motion.div
+//             key={reminder.task.id}
+//             className="reminder-item"
+//             initial={{ opacity: 0, x: -20 }}
+//             animate={{ opacity: 1, x: 0 }}
+//             transition={{ delay: index * 0.1 }}
+//           >
+//             <div className="reminder-content">
+//               <div className="reminder-task">{reminder.task.taskName}</div>
+//               <div className="reminder-due">Due: {reminder.formattedDueDate}</div>
+//               <div className="reminder-time">Time: {reminder.task.startTime} - {reminder.task.endTime}</div>
+//             </div>
+//             <div className="reminder-actions">
+//               <motion.button
+//                 onClick={() => onSnooze(reminder.task.id)}
+//                 className="snooze-btn"
+//                 whileHover={{ scale: 1.05 }}
+//                 whileTap={{ scale: 0.95 }}
+//               >
+//                 Snooze (1h)
+//               </motion.button>
+//               <motion.button
+//                 onClick={() => onDismiss(reminder.task.id)}
+//                 className="dismiss-btn"
+//                 whileHover={{ scale: 1.05 }}
+//                 whileTap={{ scale: 0.95 }}
+//               >
+//                 Dismiss
+//               </motion.button>
+//             </div>
+//           </motion.div>
+//         ))}
+//       </div>
       
-      <div className="reminder-footer">
-        <motion.button
-          onClick={() => onDismiss('all')}
-          className="dismiss-all-btn"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Dismiss All
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-};
+//       <div className="reminder-footer">
+//         <motion.button
+//           onClick={() => onDismiss('all')}
+//           className="dismiss-all-btn"
+//           whileHover={{ scale: 1.05 }}
+//           whileTap={{ scale: 0.95 }}
+//         >
+//           Dismiss All
+//         </motion.button>
+//       </div>
+//     </motion.div>
+//   );
+// };
 
 // Main TaskListingPage Component
 const TaskListingPage = ({ 
@@ -3413,7 +3413,7 @@ const TaskListingPage = ({
   return (
     <div className="task-listing-container overflow-y-auto mt-60">
       {/* Reminder Notification */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {showReminders && (
           <ReminderNotification
             reminders={currentReminders}
@@ -3421,7 +3421,7 @@ const TaskListingPage = ({
             onSnooze={handleSnoozeReminder}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       <div className="task-layout">
         {/* Left Side - Dashboard */}
