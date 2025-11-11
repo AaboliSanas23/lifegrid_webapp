@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import TaskListingPage from "./TaskListingPage";
+import TaskListingPage from "../components/taskListingPage";
 import { 
   Box, 
   Flex, 
