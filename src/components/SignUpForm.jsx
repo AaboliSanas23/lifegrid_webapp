@@ -9,15 +9,21 @@ import {
   Text,
   Center,
   Divider,
-  Checkbox
+  Checkbox,
+  Fade,
+  Box,
+  FormErrorMessage
 } from "@chakra-ui/react";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaCheckCircle, FaEnvelope } from "react-icons/fa";
 
 const SignUpForm = ({ 
   onSubmit, 
   onGoogleLogin, 
-  onLogin,
-  isLoading = false 
+  onLogin, // This should switch to login form in parent
+  isLoading = false,
+  isSuccess = false,
+  onContinue,
+  successMessage = "Your account has been created successfully! Please check your email to verify your account."
 }) => {
   const [signupData, setSignupData] = useState({
     fullName: '',
@@ -27,6 +33,9 @@ const SignUpForm = ({
     confirmPassword: '',
     agreeToTerms: false
   });
+
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const colors = {
     background: 'rgb(2, 5, 24)',
@@ -44,32 +53,206 @@ const SignUpForm = ({
     purple: '#7877FF',
     blue: '#4FC3F7',
     success: '#4CAF50',
+    error: '#E53E3E',
     gold: '#FFD700'
+  };
+
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
+
+    switch (name) {
+      case 'fullName':
+        if (!value.trim()) {
+          newErrors.fullName = 'Full name is required';
+        } else if (value.trim().length < 2) {
+          newErrors.fullName = 'Full name must be at least 2 characters';
+        } else {
+          delete newErrors.fullName;
+        }
+        break;
+
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value) {
+          newErrors.email = 'Email is required';
+        } else if (!emailRegex.test(value)) {
+          newErrors.email = 'Please enter a valid email address';
+        } else {
+          delete newErrors.email;
+        }
+        break;
+
+      case 'username':
+        if (!value.trim()) {
+          newErrors.username = 'Username is required';
+        } else if (value.trim().length < 3) {
+          newErrors.username = 'Username must be at least 3 characters';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          newErrors.username = 'Username can only contain letters, numbers, and underscores';
+        } else {
+          delete newErrors.username;
+        }
+        break;
+
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Password is required';
+        } else if (value.length < 6) {
+          newErrors.password = 'Password must be at least 6 characters';
+        } else {
+          delete newErrors.password;
+        }
+        
+        if (touched.confirmPassword && value !== signupData.confirmPassword) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else if (touched.confirmPassword) {
+          delete newErrors.confirmPassword;
+        }
+        break;
+
+      case 'confirmPassword':
+        if (!value) {
+          newErrors.confirmPassword = 'Please confirm your password';
+        } else if (value !== signupData.password) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+
+      case 'agreeToTerms':
+        if (!value) {
+          newErrors.agreeToTerms = 'You must agree to the terms and conditions';
+        } else {
+          delete newErrors.agreeToTerms;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
     setSignupData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
     }));
+
+    if (touched[name] || name === 'password' || name === 'confirmPassword') {
+      validateField(name, newValue);
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (!touched[name]) {
+      setTouched(prev => ({ ...prev, [name]: true }));
+    }
+    validateField(name, value);
+  };
+
+  const validateForm = () => {
+    const newTouched = {};
+    Object.keys(signupData).forEach(key => {
+      newTouched[key] = true;
+    });
+    setTouched(newTouched);
+
+    const fieldsValid = Object.keys(signupData).every(key => 
+      validateField(key, signupData[key])
+    );
+
+    return fieldsValid;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Basic validation
-    if (signupData.password !== signupData.confirmPassword) {
-      alert("Passwords don't match!");
-      return;
+    if (validateForm()) {
+      onSubmit(signupData);
     }
-    
-    if (!signupData.agreeToTerms) {
-      alert("Please agree to the Terms of Service and Privacy Policy");
-      return;
+  };
+
+  // Handle the "Sign In" link click
+  const handleLoginClick = () => {
+    console.log("Sign In link clicked - switching to login form");
+    if (onLogin) {
+      onLogin(); // This should tell parent to switch to login form
     }
-    
-    onSubmit(signupData);
+  };
+
+  // Success state UI
+  if (isSuccess) {
+    return (
+      <Fade in={true}>
+        <VStack spacing={6} textAlign="center" py={8}>
+          <Box
+            color={colors.success}
+            fontSize="4xl"
+            mb={4}
+          >
+            <FaCheckCircle />
+          </Box>
+          <Text fontSize="2xl" color={colors.textPrimary} fontWeight="bold">
+            Registration Successful! 🎉
+          </Text>
+          <Text color={colors.textSecondary} fontSize="lg" textAlign="center">
+            {successMessage}
+          </Text>
+          
+          <VStack spacing={3} bg={colors.backgroundTertiary} p={4} borderRadius="md" width="100%">
+            <Box color={colors.blue} fontSize="2xl">
+              <FaEnvelope />
+            </Box>
+            <Text fontSize="sm" color={colors.textPrimary} fontWeight="medium">
+              Verification Email Sent
+            </Text>
+            <Text fontSize="xs" color={colors.textTertiary} textAlign="center">
+              We've sent a confirmation link to your email address. 
+              Please check your inbox and spam folder.
+            </Text>
+          </VStack>
+
+          <Button
+            onClick={onContinue || onLogin}
+            bgGradient={colors.gradientPrimary}
+            color={colors.textPrimary}
+            _hover={{
+              bgGradient: colors.gradientHover,
+              transform: "translateY(-2px)",
+              boxShadow: `0 10px 20px ${colors.pink}40`
+            }}
+            _active={{
+              transform: "translateY(0)"
+            }}
+            padding={'20px'}
+            width="100%"
+            fontSize="md"
+            fontWeight="bold"
+            mt={4}
+          >
+            Continue to Login
+          </Button>
+        </VStack>
+      </Fade>
+    );
+  }
+
+  const isFormValid = () => {
+    return Object.keys(errors).length === 0 && 
+           signupData.fullName && 
+           signupData.email && 
+           signupData.username && 
+           signupData.password && 
+           signupData.confirmPassword && 
+           signupData.agreeToTerms;
   };
 
   return (
@@ -112,154 +295,168 @@ const SignUpForm = ({
       </Center>
 
       {/* Full Name */}
-      <FormControl>
+      <FormControl isInvalid={touched.fullName && errors.fullName}>
         <FormLabel color={colors.textPrimary}>Full Name</FormLabel>
         <Input
           name="fullName"
           value={signupData.fullName}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           bg="transparent"
           border="1px solid"
-          borderColor={colors.border}
+          borderColor={errors.fullName ? colors.error : colors.border}
           color={colors.textPrimary}
           _hover={{
-            borderColor: colors.borderHover,
+            borderColor: errors.fullName ? colors.error : colors.borderHover,
           }}
           _focus={{
             border: "1px solid",
-            borderColor: colors.pink,
-            boxShadow: `0 0 10px ${colors.pink}40`,
+            borderColor: errors.fullName ? colors.error : colors.pink,
+            boxShadow: errors.fullName ? `0 0 10px ${colors.error}40` : `0 0 10px ${colors.pink}40`,
             outline: "none"
           }}
           placeholder="Enter your full name"
           padding={'15px'}
           width="100%"
-          required
         />
+        <FormErrorMessage color={colors.error}>
+          {errors.fullName}
+        </FormErrorMessage>
       </FormControl>
 
       {/* Email */}
-      <FormControl>
+      <FormControl isInvalid={touched.email && errors.email}>
         <FormLabel color={colors.textPrimary}>Email</FormLabel>
         <Input
           name="email"
           type="email"
           value={signupData.email}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           bg="transparent"
           border="1px solid"
-          borderColor={colors.border}
+          borderColor={errors.email ? colors.error : colors.border}
           color={colors.textPrimary}
           _hover={{
-            borderColor: colors.borderHover,
+            borderColor: errors.email ? colors.error : colors.borderHover,
           }}
           _focus={{
             border: "1px solid",
-            borderColor: colors.pink,
-            boxShadow: `0 0 10px ${colors.pink}40`,
+            borderColor: errors.email ? colors.error : colors.pink,
+            boxShadow: errors.email ? `0 0 10px ${colors.error}40` : `0 0 10px ${colors.pink}40`,
             outline: "none"
           }}
           placeholder="Enter your email"
           padding={'15px'}
           width="100%"
-          required
         />
+        <FormErrorMessage color={colors.error}>
+          {errors.email}
+        </FormErrorMessage>
       </FormControl>
 
       {/* Username */}
-      <FormControl>
+      <FormControl isInvalid={touched.username && errors.username}>
         <FormLabel color={colors.textPrimary}>Username</FormLabel>
         <Input
           name="username"
           value={signupData.username}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           bg="transparent"
           border="1px solid"
-          borderColor={colors.border}
+          borderColor={errors.username ? colors.error : colors.border}
           color={colors.textPrimary}
           _hover={{
-            borderColor: colors.borderHover,
+            borderColor: errors.username ? colors.error : colors.borderHover,
           }}
           _focus={{
             border: "1px solid",
-            borderColor: colors.pink,
-            boxShadow: `0 0 10px ${colors.pink}40`,
+            borderColor: errors.username ? colors.error : colors.pink,
+            boxShadow: errors.username ? `0 0 10px ${colors.error}40` : `0 0 10px ${colors.pink}40`,
             outline: "none"
           }}
           placeholder="Choose a username"
           padding={'15px'}
           width="100%"
-          required
         />
+        <FormErrorMessage color={colors.error}>
+          {errors.username}
+        </FormErrorMessage>
       </FormControl>
 
       {/* Password */}
-      <FormControl>
+      <FormControl isInvalid={touched.password && errors.password}>
         <FormLabel color={colors.textPrimary}>Password</FormLabel>
         <Input
           name="password"
           type="password"
           value={signupData.password}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           bg="transparent"
           border="1px solid"
-          borderColor={colors.border}
+          borderColor={errors.password ? colors.error : colors.border}
           color={colors.textPrimary}
           _hover={{
-            borderColor: colors.borderHover,
+            borderColor: errors.password ? colors.error : colors.borderHover,
           }}
           _focus={{
             border: "1px solid",
-            borderColor: colors.pink,
-            boxShadow: `0 0 10px ${colors.pink}40`,
+            borderColor: errors.password ? colors.error : colors.pink,
+            boxShadow: errors.password ? `0 0 10px ${colors.error}40` : `0 0 10px ${colors.pink}40`,
             outline: "none"
           }}
-          placeholder="Create a password"
+          placeholder="Create a password (min. 6 characters)"
           padding={'15px'}
           width="100%"
-          required
         />
+        <FormErrorMessage color={colors.error}>
+          {errors.password}
+        </FormErrorMessage>
       </FormControl>
 
       {/* Confirm Password */}
-      <FormControl>
+      <FormControl isInvalid={touched.confirmPassword && errors.confirmPassword}>
         <FormLabel color={colors.textPrimary}>Confirm Password</FormLabel>
         <Input
           name="confirmPassword"
           type="password"
           value={signupData.confirmPassword}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           bg="transparent"
           border="1px solid"
-          borderColor={colors.border}
+          borderColor={errors.confirmPassword ? colors.error : colors.border}
           color={colors.textPrimary}
           _hover={{
-            borderColor: colors.borderHover,
+            borderColor: errors.confirmPassword ? colors.error : colors.borderHover,
           }}
           _focus={{
             border: "1px solid",
-            borderColor: colors.pink,
-            boxShadow: `0 0 10px ${colors.pink}40`,
+            borderColor: errors.confirmPassword ? colors.error : colors.pink,
+            boxShadow: errors.confirmPassword ? `0 0 10px ${colors.error}40` : `0 0 10px ${colors.pink}40`,
             outline: "none"
           }}
           placeholder="Confirm your password"
           padding={'15px'}
           width="100%"
-          required
         />
+        <FormErrorMessage color={colors.error}>
+          {errors.confirmPassword}
+        </FormErrorMessage>
       </FormControl>
 
       {/* Terms Agreement */}
-      <FormControl marginTop={'-15px'}>
+      <FormControl isInvalid={touched.agreeToTerms && errors.agreeToTerms}>
         <Checkbox
           name="agreeToTerms"
           isChecked={signupData.agreeToTerms}
           onChange={handleInputChange}
           color={colors.textPrimary}
           colorScheme="pink"
-          
         >
-          <Text  marginTop={'18px'} color={colors.textSecondary} fontSize="sm">
+          <Text marginTop={'18px'} color={colors.textSecondary} fontSize="sm">
             I agree to the{' '}
             <Button variant="link" color={colors.pink} fontSize="sm">
               Terms of Service
@@ -270,6 +467,11 @@ const SignUpForm = ({
             </Button>
           </Text>
         </Checkbox>
+        {errors.agreeToTerms && (
+          <Text color={colors.error} fontSize="sm" mt={1}>
+            {errors.agreeToTerms}
+          </Text>
+        )}
       </FormControl>
 
       {/* Sign Up Button */}
@@ -292,6 +494,19 @@ const SignUpForm = ({
         fontSize="md"
         fontWeight="bold"
         mt={2}
+        isDisabled={!isFormValid() && !isLoading}
+        _disabled={{
+          bg: colors.backgroundTertiary,
+          color: colors.textTertiary,
+          cursor: 'not-allowed',
+          transform: 'none',
+          boxShadow: 'none',
+          _hover: {
+            bg: colors.backgroundTertiary,
+            transform: 'none',
+            boxShadow: 'none'
+          }
+        }}
       >
         Create Account
       </Button>
@@ -306,7 +521,7 @@ const SignUpForm = ({
           color={colors.pink}
           _hover={{ textDecoration: "none" }}
           fontSize="sm"
-          onClick={onLogin}
+          onClick={handleLoginClick} // Use the handler function
           marginTop={'-18px'}
         >
           Sign In

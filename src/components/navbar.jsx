@@ -35,6 +35,8 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
   // Auth modal state management
   const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot-password'
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [isSignUpSuccess, setIsSignUpSuccess] = useState(false);
 
   // Color constants from your CSS
   const colors = {
@@ -76,6 +78,8 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
 
   const handleLoginClick = () => {
     setAuthMode('login');
+    setIsLoginSuccess(false);
+    setIsSignUpSuccess(false);
     onAuthOpen();
   };
 
@@ -87,8 +91,15 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
       // Add your actual login logic here
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log("Login successful!");
-      onAuthClose();
+      setIsLoginSuccess(true);
       setIsLoading(false);
+      
+      // Auto-close after success
+      setTimeout(() => {
+        onAuthClose();
+        setIsLoginSuccess(false);
+      }, 2000);
+      
     } catch (error) {
       console.error("Login failed:", error);
       setIsLoading(false);
@@ -102,7 +113,7 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
       // Add your actual signup logic here
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log("Sign up successful!");
-      onAuthClose();
+      setIsSignUpSuccess(true);
       setIsLoading(false);
     } catch (error) {
       console.error("Sign up failed:", error);
@@ -118,6 +129,8 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log("Password reset email sent!");
       setIsLoading(false);
+      // Show success message or redirect back to login
+      setAuthMode('login');
     } catch (error) {
       console.error("Forgot password failed:", error);
       setIsLoading(false);
@@ -127,11 +140,40 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
   const handleGoogleAuth = () => {
     console.log("Google auth initiated for:", authMode);
     // Implement Google OAuth logic here
-    // Example: window.location.href = `/auth/google?mode=${authMode}`
+  };
+
+  // Reset auth modal when closing
+  const handleAuthModalClose = () => {
+    setIsLoginSuccess(false);
+    setIsSignUpSuccess(false);
+    setAuthMode('login');
+    onAuthClose();
+  };
+
+  // Handle success continue button for signup - FIXED THIS FUNCTION
+  const handleSuccessContinue = () => {
+    console.log("Continue to login clicked");
+    setIsSignUpSuccess(false);
+    setAuthMode('login');
+    // Don't close the modal, just switch to login form
+  };
+
+  // Handle switching from signup to login form
+  const handleSwitchToLogin = () => {
+    console.log("Switching to login form");
+    setAuthMode('login');
+    setIsSignUpSuccess(false);
   };
 
   // Modal title and content based on auth mode
   const getAuthModalTitle = () => {
+    if (authMode === 'login' && isLoginSuccess) {
+      return 'Welcome Back! 👋';
+    }
+    if (authMode === 'signup' && isSignUpSuccess) {
+      return 'Registration Successful! 🎉';
+    }
+    
     switch (authMode) {
       case 'login':
         return 'Welcome Back';
@@ -145,6 +187,39 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
   };
 
   const renderAuthContent = () => {
+    console.log("Rendering auth content:", { authMode, isLoginSuccess, isSignUpSuccess });
+
+    // Success states
+    if (authMode === 'login' && isLoginSuccess) {
+      return (
+        <LoginForm
+          onSubmit={handleEmailLogin}
+          onGoogleLogin={handleGoogleAuth}
+          onForgotPassword={() => setAuthMode('forgot-password')}
+          onSignUp={() => {
+            setAuthMode('signup');
+            setIsSignUpSuccess(false);
+          }}
+          isLoading={isLoading}
+          isSuccess={isLoginSuccess}
+        />
+      );
+    }
+
+    if (authMode === 'signup' && isSignUpSuccess) {
+      return (
+        <SignUpForm
+          onSubmit={handleSignUp}
+          onGoogleLogin={handleGoogleAuth}
+          onLogin={handleSwitchToLogin}
+          isLoading={isLoading}
+          isSuccess={isSignUpSuccess}
+          onContinue={handleSuccessContinue} // This is the key fix
+        />
+      );
+    }
+
+    // Normal states
     switch (authMode) {
       case 'login':
         return (
@@ -152,8 +227,12 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
             onSubmit={handleEmailLogin}
             onGoogleLogin={handleGoogleAuth}
             onForgotPassword={() => setAuthMode('forgot-password')}
-            onSignUp={() => setAuthMode('signup')}
+            onSignUp={() => {
+              setAuthMode('signup');
+              setIsSignUpSuccess(false);
+            }}
             isLoading={isLoading}
+            isSuccess={false}
           />
         );
       case 'signup':
@@ -161,8 +240,9 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           <SignUpForm
             onSubmit={handleSignUp}
             onGoogleLogin={handleGoogleAuth}
-            onLogin={() => setAuthMode('login')}
+            onLogin={handleSwitchToLogin} // Fixed this
             isLoading={isLoading}
+            isSuccess={false}
           />
         );
       case 'forgot-password':
@@ -356,10 +436,11 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           backdropFilter="blur(10px)"
         />
         <ModalContent 
-         style={{
-              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px',}}
+          style={{
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+          }}
           bg={colors.background}
           border="1px solid"
           borderColor={colors.border}
@@ -378,57 +459,30 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           >
             Create New Task
           </ModalHeader>
-           {/* <button
-                onClick={onClose}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  fontSize: '24px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(255, 45, 149, 0.3)';
-                  e.target.style.transform = 'rotate(90deg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.transform = 'rotate(0deg)';
-                }}
-              >
-                ×
-              </button> */}
           <ModalCloseButton 
-           style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  fontSize: '12px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
-                  marginTop:'5px'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(255, 45, 149, 0.3)';
-                  e.target.style.transform = 'rotate(90deg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.transform = 'rotate(0deg)';
-                }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              fontSize: '12px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s ease',
+              marginTop:'5px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 45, 149, 0.3)';
+              e.target.style.transform = 'rotate(90deg)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.transform = 'rotate(0deg)';
+            }}
             color={colors.textPrimary} 
             _hover={{ bg: colors.backgroundTertiary }} 
           />
@@ -439,7 +493,7 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
       </Modal>
 
       {/* Auth Modal */}
-      <Modal isOpen={isAuthOpen} onClose={onAuthClose} size="md" isCentered>
+      <Modal isOpen={isAuthOpen} onClose={handleAuthModalClose} size="md" isCentered>
         <ModalOverlay 
           bg="blackAlpha.600"
           backdropFilter="blur(10px)"
@@ -463,10 +517,15 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           >
             {getAuthModalTitle()}
           </ModalHeader>
-          <ModalCloseButton 
-            color={colors.textPrimary} 
-            _hover={{ bg: colors.backgroundTertiary }} 
-          />
+          
+          {/* Only show close button if not in success state */}
+          {!((authMode === 'login' && isLoginSuccess) || (authMode === 'signup' && isSignUpSuccess)) && (
+            <ModalCloseButton 
+              color={colors.textPrimary} 
+              _hover={{ bg: colors.backgroundTertiary }} 
+            />
+          )}
+          
           <ModalBody p={6}>
             {renderAuthContent()}
           </ModalBody>
