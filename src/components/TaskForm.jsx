@@ -361,7 +361,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
         status: "error",
         duration: 3000,
         isClosable: true,
-        position: "top-right"
+        position: "top"
       })
     }
   })
@@ -371,7 +371,14 @@ const TaskForm = ({ onClose, onSubmit }) => {
   const hasValidBudgetItems = budgetItems.some(item => item.name?.trim() && Number(item.price) > 0)
 
   return (
-    <Box bg="rgb(2, 5, 24)" p={6} borderRadius="lg" width="100%">
+    <Box 
+      bg="rgb(2, 5, 24)" 
+      p={{ base: 4, sm: 6 }} 
+      borderRadius="lg" 
+      width="100%"
+      maxW="100vw"
+      overflow="hidden"
+    >
       {/* Custom styles for calendar and time inputs */}
       <style>{`
         input[type="date"]::-webkit-calendar-picker-indicator {
@@ -410,6 +417,13 @@ const TaskForm = ({ onClose, onSubmit }) => {
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+          input, select {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+          }
+        }
       `}</style>
       
       <form onSubmit={handleFormSubmit}>
@@ -417,7 +431,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
           
           {/* Task Name Input */}
           <FormControl isInvalid={errors.taskName}>
-            <FormLabel color="white">Task Name</FormLabel>
+            <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Task Name</FormLabel>
             <Input 
               {...register("taskName", { required: "Task name is required" })}
               bg="transparent"
@@ -434,15 +448,16 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 outline: "none"
               }}
               placeholder="Enter task name"
-              padding={'20px'}
+              padding={{ base: '16px', sm: '20px' }}
+              fontSize={{ base: "sm", sm: "md" }}
               width="100%"
             />
-            <FormErrorMessage>{errors.taskName?.message}</FormErrorMessage>
+            <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.taskName?.message}</FormErrorMessage>
           </FormControl>
 
           {/* Task Type Dropdown */}
           <FormControl isInvalid={errors.taskType}>
-            <FormLabel color="white">Task Type</FormLabel>
+            <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Task Type</FormLabel>
             
             {!showCustomInput ? (
               <Select
@@ -463,11 +478,14 @@ const TaskForm = ({ onClose, onSubmit }) => {
                   outline: "none"
                 }}
                 width="100%"
+                fontSize={{ base: "sm", sm: "md" }}
+                height={{ base: "48px", sm: "auto" }}
                 iconColor="white"
                 sx={{
                   '> option': {
                     background: 'rgb(2, 5, 24)',
-                    color: 'white'
+                    color: 'white',
+                    fontSize: { base: "sm", sm: "md" }
                   }
                 }}
               >
@@ -506,7 +524,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                   outline: "none"
                 }}
                 placeholder="Enter custom task type"
-                padding={'20px'}
+                padding={{ base: '16px', sm: '20px' }}
+                fontSize={{ base: "sm", sm: "md" }}
                 width="100%"
                 autoFocus
               />
@@ -515,7 +534,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
             {showCustomInput && (
               <Text 
                 color="gray.400" 
-                fontSize="sm" 
+                fontSize={{ base: "xs", sm: "sm" }} 
                 mt={2} 
                 cursor="pointer"
                 _hover={{ color: "pink.400" }}
@@ -529,12 +548,12 @@ const TaskForm = ({ onClose, onSubmit }) => {
               </Text>
             )}
             
-            <FormErrorMessage>{errors.taskType?.message}</FormErrorMessage>
+            <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.taskType?.message}</FormErrorMessage>
           </FormControl>
 
           {/* Calendar Date Input */}
           <FormControl isInvalid={errors.dueDate}>
-            <FormLabel color="white">Due Date</FormLabel>
+            <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Due Date</FormLabel>
             <InputGroup>
               <Input 
                 type="date"
@@ -555,7 +574,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                   boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
                   outline: "none",
                 }}
-                padding={'20px'}
+                padding={{ base: '16px', sm: '20px' }}
+                fontSize={{ base: "sm", sm: "md" }}
                 width="100%"
                 sx={{
                   '&::-webkit-calendar-picker-indicator': {
@@ -567,12 +587,12 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 }}
               />
             </InputGroup>
-            <FormErrorMessage>{errors.dueDate?.message}</FormErrorMessage>
+            <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.dueDate?.message}</FormErrorMessage>
           </FormControl>
 
           {/* Description Input */}
           <FormControl isInvalid={errors.description}>
-            <FormLabel color="white">Description</FormLabel>
+            <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Description</FormLabel>
             <Input 
               {...register("description", { required: "Description is required" })}
               bg="transparent"
@@ -589,19 +609,24 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 outline: "none"
               }}
               placeholder="Enter task description"
-              padding={'20px'}
+              padding={{ base: '16px', sm: '20px' }}
+              fontSize={{ base: "sm", sm: "md" }}
               width="100%"
             />
-            <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
+            <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.description?.message}</FormErrorMessage>
           </FormControl>
 
           {/* Time Fields - Show for all task types except personal */}
           {taskType !== "personal" && (
             <>
-              {/* Start Time and End Time */}
-              <HStack spacing={4} width="100%">
+              {/* Start Time and End Time - Stack vertically on mobile */}
+              <Stack 
+                spacing={4} 
+                width="100%" 
+                direction={{ base: "column", sm: "row" }}
+              >
                 <FormControl isInvalid={errors.startTime} flex={1}>
-                  <FormLabel color="white">Start Time</FormLabel>
+                  <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Start Time</FormLabel>
                   <InputGroup position="relative">
                     <Input 
                       type="time"
@@ -621,7 +646,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                         boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
                         outline: "none",
                       }}
-                      padding={'20px'}
+                      padding={{ base: '16px', sm: '20px' }}
+                      fontSize={{ base: "sm", sm: "md" }}
                       width="100%"
                       sx={{
                         '&::-webkit-calendar-picker-indicator': {
@@ -645,16 +671,16 @@ const TaskForm = ({ onClose, onSubmit }) => {
                           color: 'white',
                           pointerEvents: 'none',
                           zIndex: 0,
-                          fontSize: '18px'
+                          fontSize: { base: '16px', sm: '18px' }
                         }
                       }}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.startTime?.message}</FormErrorMessage>
+                  <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.startTime?.message}</FormErrorMessage>
                 </FormControl>
 
                 <FormControl isInvalid={errors.endTime} flex={1}>
-                  <FormLabel color="white">End Time</FormLabel>
+                  <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>End Time</FormLabel>
                   <InputGroup position="relative">
                     <Input 
                       type="time"
@@ -674,7 +700,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                         boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
                         outline: "none",
                       }}
-                      padding={'20px'}
+                      padding={{ base: '16px', sm: '20px' }}
+                      fontSize={{ base: "sm", sm: "md" }}
                       width="100%"
                       sx={{
                         '&::-webkit-calendar-picker-indicator': {
@@ -698,18 +725,18 @@ const TaskForm = ({ onClose, onSubmit }) => {
                           color: 'white',
                           pointerEvents: 'none',
                           zIndex: 0,
-                          fontSize: '18px'
+                          fontSize: { base: '16px', sm: '18px' }
                         }
                       }}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.endTime?.message}</FormErrorMessage>
+                  <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.endTime?.message}</FormErrorMessage>
                 </FormControl>
-              </HStack>
+              </Stack>
 
               {/* Time Range Validation Error */}
               {errors.timeRange && (
-                <Text color="red.400" fontSize="sm" mt={-2}>
+                <Text color="red.400" fontSize={{ base: "xs", sm: "sm" }} mt={-2}>
                   {errors.timeRange.message}
                 </Text>
               )}
@@ -717,7 +744,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
               {/* Duration Display */}
               {(startTime || endTime) && (
                 <FormControl isInvalid={!durationResult.isValid} width="100%">
-                  <FormLabel color="white">Total Duration</FormLabel>
+                  <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Total Duration</FormLabel>
                   <Input 
                     value={durationResult.display}
                     bg="transparent"
@@ -728,7 +755,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                         ? (startTime && endTime ? "green.300" : "gray.400")
                         : "red.400"
                     }
-                    padding={'20px'}
+                    padding={{ base: '16px', sm: '20px' }}
+                    fontSize={{ base: "sm", sm: "md" }}
                     isReadOnly
                     _focus={{
                       border: "1px solid",
@@ -740,7 +768,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
                     width="100%"
                   />
                   {!durationResult.isValid && durationResult.display !== "Set start and end time" && (
-                    <FormErrorMessage>{durationResult.display}</FormErrorMessage>
+                    <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{durationResult.display}</FormErrorMessage>
                   )}
                 </FormControl>
               )}
@@ -753,8 +781,9 @@ const TaskForm = ({ onClose, onSubmit }) => {
               colorScheme="pink"
               isChecked={needsBudget}
               onChange={handleBudgetCheckboxChange}
+              size={{ base: "md", sm: "lg" }}
             >
-              <Box color="white">Did your task need budget planning?</Box>
+              <Box color="white" fontSize={{ base: "sm", sm: "md" }}>Did your task need budget planning?</Box>
             </Checkbox>
           </FormControl>
 
@@ -764,18 +793,25 @@ const TaskForm = ({ onClose, onSubmit }) => {
               colorScheme="pink"
               isChecked={needsReminder}
               onChange={handleReminderCheckboxChange}
+              size={{ base: "md", sm: "lg" }}
             >
-              <Box color="white">Do you need a reminder for this task?</Box>
+              <Box color="white" fontSize={{ base: "sm", sm: "md" }}>Do you need a reminder for this task?</Box>
             </Checkbox>
           </FormControl>
 
           {/* Conditional Fields for Budget Planning */}
           {needsBudget && (
             <FormControl isInvalid={errors.budgetItems} width="100%">
-              <FormLabel color="white">Budget Items</FormLabel>
+              <FormLabel color="white" fontSize={{ base: "sm", sm: "md" }}>Budget Items</FormLabel>
               <VStack spacing={3} width="100%" align="stretch">
                 {budgetItems.map((item, index) => (
-                  <HStack key={index} spacing={3} width="100%">
+                  <Stack 
+                    key={index} 
+                    spacing={3} 
+                    width="100%" 
+                    direction={{ base: "column", sm: "row" }}
+                    align={{ base: "stretch", sm: "center" }}
+                  >
                     <Input
                       value={item.name}
                       onChange={(e) => updateBudgetItem(index, "name", e.target.value)}
@@ -793,12 +829,17 @@ const TaskForm = ({ onClose, onSubmit }) => {
                         outline: "none"
                       }}
                       placeholder="Item name"
-                      padding={'15px'}
-                      flex={2}
+                      padding={{ base: '12px', sm: '15px' }}
+                      fontSize={{ base: "sm", sm: "md" }}
+                      flex={{ sm: 2 }}
                     />
-                    <InputGroup flex={1}>
-                      <InputLeftElement paddingTop={'8px'} pointerEvents="none">
-                        <LuDollarSign color="white" />
+                    <InputGroup flex={{ sm: 1 }}>
+                      <InputLeftElement 
+                        paddingTop={{ base: '6px', sm: '8px' }} 
+                        pointerEvents="none"
+                        height="100%"
+                      >
+                        <LuDollarSign color="white" size={16} />
                       </InputLeftElement>
                       <NumberInput 
                         value={item.price} 
@@ -807,7 +848,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
                         width="100%"
                       >
                         <NumberInputField 
-                          pl={10}
+                          pl={8}
                           bg="transparent"
                           border="1px solid"
                           borderColor={(Number(item.price) <= 0 && errors.budgetItems) ? "red.500" : "gray.600"}
@@ -821,28 +862,30 @@ const TaskForm = ({ onClose, onSubmit }) => {
                             boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
                             outline: "none"
                           }}
-                          padding={'15px'}
+                          padding={{ base: '12px', sm: '15px' }}
+                          fontSize={{ base: "sm", sm: "md" }}
                         />
                       </NumberInput>
                     </InputGroup>
                     <IconButton
-                      icon={<LuTrash2 color="white" />}
+                      icon={<LuTrash2 color="white" size={16} />}
                       onClick={() => removeBudgetItem(index)}
                       colorScheme="red"
                       variant="outline"
                       aria-label="Remove item"
-                      padding={'15px'}
+                      padding={{ base: '12px', sm: '15px' }}
                       flexShrink={0}
+                      minW="auto"
                       _hover={{
                         bg: "red.500",
                         borderColor: "red.500"
                       }}
                     />
-                  </HStack>
+                  </Stack>
                 ))}
                 
                 <Button
-                  leftIcon={<LuPlus color="pink.400" />}
+                  leftIcon={<LuPlus color="pink.400" size={18} />}
                   onClick={addBudgetItem}
                   variant="outline"
                   colorScheme="pink"
@@ -852,7 +895,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
                     bg: "pink.400",
                     color: "white"
                   }}
-                  padding={'15px'}
+                  padding={{ base: '12px', sm: '15px' }}
+                  fontSize={{ base: "sm", sm: "md" }}
                   width="100%"
                 >
                   Add Budget Item
@@ -870,20 +914,25 @@ const TaskForm = ({ onClose, onSubmit }) => {
                     width="100%"
                   >
                     <HStack justify="space-between">
-                      <Text color="white" fontWeight="bold">Total Budget:</Text>
-                      <Text color="green.300" fontWeight="bold" fontSize="lg">
+                      <Text color="white" fontWeight="bold" fontSize={{ base: "sm", sm: "md" }}>Total Budget:</Text>
+                      <Text color="green.300" fontWeight="bold" fontSize={{ base: "md", sm: "lg" }}>
                         ${totalBudget.toFixed(2)}
                       </Text>
                     </HStack>
                   </Box>
                 )}
               </VStack>
-              <FormErrorMessage>{errors.budgetItems?.message}</FormErrorMessage>
+              <FormErrorMessage fontSize={{ base: "xs", sm: "sm" }}>{errors.budgetItems?.message}</FormErrorMessage>
             </FormControl>
           )}
 
           {/* Action Buttons */}
-          <HStack spacing={4} width="100%" mt={4}>
+          <Stack 
+            spacing={4} 
+            width="100%" 
+            mt={4}
+            direction={{ base: "column", sm: "row" }}
+          >
             <Button 
               type="submit"
               flex={2}
@@ -897,7 +946,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
               _active={{
                 transform: "translateY(0)"
               }}
-              padding={'25px'}
+              padding={{ base: '20px', sm: '25px' }}
+              fontSize={{ base: "sm", sm: "md" }}
               isLoading={isSubmitting}
               isDisabled={
                 !!errors.timeRange || 
@@ -907,7 +957,7 @@ const TaskForm = ({ onClose, onSubmit }) => {
             >
               Add Task
             </Button>
-          </HStack>
+          </Stack>
         </Stack>
       </form>
     </Box>

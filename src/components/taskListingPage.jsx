@@ -2176,7 +2176,9 @@ const DashboardSidebar = ({
   onShowAddTask,
   activeDialog,
   onCloseDialog,
-  upcomingReminders
+  upcomingReminders,
+  onCloseMobile,
+  isMobile = false
 }) => {
   const [expandedYears, setExpandedYears] = useState(new Set(['2026']));
 
@@ -2301,7 +2303,22 @@ const DashboardSidebar = ({
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="dashboard-header">
+        {/* Mobile Close Button - Only show on mobile */}
+        {isMobile && (
+          <div className="mobile-sidebar-header pt-[100px]">
+            <h2>Task Dashboard</h2>
+            <motion.button 
+              className="mobile-close-btn mt-60"
+              onClick={onCloseMobile}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              ×
+            </motion.button>
+          </div>
+        )}
+
+        <div className="dashboard-header ">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -2318,6 +2335,7 @@ const DashboardSidebar = ({
           </motion.p>
         </div>
 
+        {/* ... rest of the DashboardSidebar content remains the same ... */}
         <motion.div
           className="stats-container"
           initial="hidden"
@@ -2586,7 +2604,12 @@ const DashboardSidebar = ({
                   <motion.div
                     key={date}
                     className={`date-preview ${activeDate === date ? "active" : ""}`}
-                    onClick={() => setActiveDate(date)}
+                    onClick={() => {
+                      setActiveDate(date);
+                      if (isMobile && onCloseMobile) {
+                        onCloseMobile();
+                      }
+                    }}
                     variants={{
                       hidden: { 
                         opacity: 0, 
@@ -2781,7 +2804,9 @@ const DashboardSidebar = ({
   );
 };
 
-// Task List Side Component
+// ... (rest of the components remain the same until the main TaskListingPage)
+
+// Updated TaskListSide with mobile menu button
 const TaskListSide = ({
   tasks,
   yearMonthData,
@@ -2796,7 +2821,9 @@ const TaskListSide = ({
   onToggleComplete,
   onEditTask,
   onDeleteTask,
-  onToggleReminder
+  onToggleReminder,
+  onOpenMobileSidebar,
+  isMobile = false
 }) => {
   const [expandedYears, setExpandedYears] = useState(new Set(['2026']));
 
@@ -2827,17 +2854,39 @@ const TaskListSide = ({
   const yearKeys = Object.keys(yearMonthData).sort((a, b) => b - a);
 
   return (
-    <motion.div
-      className="task-list-side w-[100%]"
-      initial={{ x: 50, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-
-    >
+   <motion.div
+  className="task-list-side w-full sm:h-screen sm:pb-[100px]"
+  // style={{
+  //   height:"auto",
+  //   padding: "20px",
+  //   borderRadius: "8px"
+  // }}
+  initial={{ x: 50, opacity: 0 }}
+  animate={{ x: 0, opacity: 1 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+>
       <div className="task-list-header">
         <div className="header-main">
-          <h2>My Tasks & Expenses</h2>
-          <div className="current-date">{formatDate(activeDate).full}</div>
+          {/* Mobile Menu Button - Only show on mobile */}
+          {isMobile && (
+            <div className="mobile-header">
+              <motion.button 
+                className="mobile-menu-btn" 
+                onClick={onOpenMobileSidebar}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                ☰
+              </motion.button>
+              <h2>My Tasks & Expenses</h2>
+            </div>
+          )}
+          {!isMobile && (
+            <>
+              <h2>My Tasks & Expenses</h2>
+              <div className="current-date">{formatDate(activeDate).full}</div>
+            </>
+          )}
         </div>
         
         <TaskFilter
@@ -2849,6 +2898,12 @@ const TaskListSide = ({
           filteredTasksCount={tasks.length}
         />
       </div>
+
+      {isMobile && (
+        <div className="current-date-mobile">
+          {formatDate(activeDate).full}
+        </div>
+      )}
 
       <div className="year-accordions">
         <AnimatePresence mode="popLayout">
@@ -2959,7 +3014,9 @@ const TaskFormModal = ({ isOpen, onClose, onAddTask }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-         
+          style={{
+            marginTop:'20px'
+          }}
         >
           <motion.div 
             // className="modal-content"
@@ -2975,7 +3032,7 @@ const TaskFormModal = ({ isOpen, onClose, onAddTask }) => {
               width:'600px',
               maxHeight: '85vh',
               overflow: 'auto',
-               marginTop:'40px',
+               marginTop:'100px',
                padding:'0',
                margin:'0'
             }}
@@ -3040,72 +3097,7 @@ const TaskFormModal = ({ isOpen, onClose, onAddTask }) => {
   );
 };
 
-// Reminder Notification Component
-// const ReminderNotification = ({ reminders, onDismiss, onSnooze }) => {
-//   return (
-//     <motion.div
-//       className="reminder-notification-container"
-//       initial={{ opacity: 0, y: -50, scale: 0.8 }}
-//       animate={{ opacity: 1, y: 0, scale: 1 }}
-//       exit={{ opacity: 0, y: -50, scale: 0.8 }}
-//       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-//     >
-//       <div className="reminder-header">
-//         <h3>🔔 Task Reminders</h3>
-//         <span className="reminder-count">{reminders.length} reminder(s)</span>
-//       </div>
-      
-//       <div className="reminder-list">
-//         {reminders.map((reminder, index) => (
-//           <motion.div
-//             key={reminder.task.id}
-//             className="reminder-item"
-//             initial={{ opacity: 0, x: -20 }}
-//             animate={{ opacity: 1, x: 0 }}
-//             transition={{ delay: index * 0.1 }}
-//           >
-//             <div className="reminder-content">
-//               <div className="reminder-task">{reminder.task.taskName}</div>
-//               <div className="reminder-due">Due: {reminder.formattedDueDate}</div>
-//               <div className="reminder-time">Time: {reminder.task.startTime} - {reminder.task.endTime}</div>
-//             </div>
-//             <div className="reminder-actions">
-//               <motion.button
-//                 onClick={() => onSnooze(reminder.task.id)}
-//                 className="snooze-btn"
-//                 whileHover={{ scale: 1.05 }}
-//                 whileTap={{ scale: 0.95 }}
-//               >
-//                 Snooze (1h)
-//               </motion.button>
-//               <motion.button
-//                 onClick={() => onDismiss(reminder.task.id)}
-//                 className="dismiss-btn"
-//                 whileHover={{ scale: 1.05 }}
-//                 whileTap={{ scale: 0.95 }}
-//               >
-//                 Dismiss
-//               </motion.button>
-//             </div>
-//           </motion.div>
-//         ))}
-//       </div>
-      
-//       <div className="reminder-footer">
-//         <motion.button
-//           onClick={() => onDismiss('all')}
-//           className="dismiss-all-btn"
-//           whileHover={{ scale: 1.05 }}
-//           whileTap={{ scale: 0.95 }}
-//         >
-//           Dismiss All
-//         </motion.button>
-//       </div>
-//     </motion.div>
-//   );
-// };
-
-// Main TaskListingPage Component
+// Updated Main TaskListingPage Component
 const TaskListingPage = ({ 
   onBackToLanding, 
   tasks: initialTasks = [], 
@@ -3126,6 +3118,27 @@ const TaskListingPage = ({
   const [showReminders, setShowReminders] = useState(false);
   const [currentReminders, setCurrentReminders] = useState([]);
   const [snoozedTasks, setSnoozedTasks] = useState(new Set());
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      // On mobile, start with sidebar closed
+      if (mobile) {
+        setShowMobileSidebar(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Update tasks when initialTasks changes
   React.useEffect(() => {
@@ -3410,51 +3423,59 @@ const TaskListingPage = ({
     setActiveDialog(null);
   };
 
+  // Mobile sidebar handlers
+  const handleOpenMobileSidebar = () => {
+    setShowMobileSidebar(true);
+  };
+
+  const handleCloseMobileSidebar = () => {
+    setShowMobileSidebar(false);
+  };
+
   return (
     <div className="task-listing-container overflow-y-auto mt-60">
-      {/* Reminder Notification */}
-      {/* <AnimatePresence>
-        {showReminders && (
-          <ReminderNotification
-            reminders={currentReminders}
-            onDismiss={handleDismissReminder}
-            onSnooze={handleSnoozeReminder}
+      <div className={`task-layout ${showMobileSidebar && isMobile ? 'mobile-sidebar-open' : ''}`}>
+        {/* Left Side - Dashboard */}
+        {/* Show sidebar on desktop always, on mobile only when showMobileSidebar is true */}
+        {(!isMobile || showMobileSidebar) && (
+          <DashboardSidebar
+            tasks={filteredTasks}
+            yearMonthData={yearMonthData}
+            activeDate={activeDate}
+            setActiveDate={setActiveDate}
+            statsData={statsData}
+            onOpenDialog={handleOpenDialog}
+            onShowAddTask={() => setShowAddTask(true)}
+            activeDialog={activeDialog}
+            onCloseDialog={handleCloseDialog}
+            upcomingReminders={upcomingReminders}
+            onCloseMobile={handleCloseMobileSidebar}
+            isMobile={isMobile}
           />
         )}
-      </AnimatePresence> */}
-
-      <div className="task-layout">
-        {/* Left Side - Dashboard */}
-        <DashboardSidebar
-          tasks={filteredTasks}
-          yearMonthData={yearMonthData}
-          activeDate={activeDate}
-          setActiveDate={setActiveDate}
-          statsData={statsData}
-          onOpenDialog={handleOpenDialog}
-          onShowAddTask={() => setShowAddTask(true)}
-          activeDialog={activeDialog}
-          onCloseDialog={handleCloseDialog}
-          upcomingReminders={upcomingReminders}
-        />
 
         {/* Right Side - Task List */}
-        <TaskListSide
-          tasks={filteredTasks}
-          yearMonthData={yearMonthData}
-          activeDate={activeDate}
-          setActiveDate={setActiveDate}
-          editingTask={editingTask}
-          setEditingTask={setEditingTask}
-          showFilter={showFilter}
-          setShowFilter={setShowFilter}
-          filters={filters}
-          setFilters={setFilters}
-          onToggleComplete={handleToggleComplete}
-          onEditTask={handleEditTask}
-          onDeleteTask={handleDeleteTask}
-          onToggleReminder={handleToggleReminder}
-        />
+        {/* Show task list on desktop always, on mobile only when sidebar is closed */}
+        {(!isMobile || !showMobileSidebar) && (
+          <TaskListSide
+            tasks={filteredTasks}
+            yearMonthData={yearMonthData}
+            activeDate={activeDate}
+            setActiveDate={setActiveDate}
+            editingTask={editingTask}
+            setEditingTask={setEditingTask}
+            showFilter={showFilter}
+            setShowFilter={setShowFilter}
+            filters={filters}
+            setFilters={setFilters}
+            onToggleComplete={handleToggleComplete}
+            onEditTask={handleEditTask}
+            onDeleteTask={handleDeleteTask}
+            onToggleReminder={handleToggleReminder}
+            onOpenMobileSidebar={handleOpenMobileSidebar}
+            isMobile={isMobile}
+          />
+        )}
       </div>
 
       {/* Task Form Modal */}
@@ -3466,17 +3487,18 @@ const TaskListingPage = ({
       
       {/* Custom Scrollbar Styles */}
       <style>{`
-            .dashboard-sidebar{
-            max-height:93vh;}
-              .task-list-side{
-              max-height:93vh;
-              }
-              * {
-                scrollbar-width: thin;
-                scrollbar-color: rgba(220, 28, 124, 0.36) rgba(255, 255, 255, 0.05);
-              }
+        .dashboard-sidebar{
+          max-height:93vh;
+        }
+        .task-list-side{
+          max-height:93vh;
+        }
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(220, 28, 124, 0.36) rgba(255, 255, 255, 0.05);
+        }
 
-              *::-webkit-scrollbar {
+        *::-webkit-scrollbar {
           width: 0.5px;
           height: 0.5px;
         }
@@ -3502,6 +3524,146 @@ const TaskListingPage = ({
           
           .chart-content-grid {
             grid-template-columns: 1fr !important;
+          }
+
+          /* Mobile responsive styles */
+          .task-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-sidebar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            background: rgb(2, 5, 24);
+            padding: 20px;
+            overflow-y: auto;
+          }
+
+          .task-layout.mobile-sidebar-open .dashboard-sidebar {
+            display: block;
+          }
+
+          .task-layout.mobile-sidebar-open .task-list-side {
+            display: none;
+          }
+
+          .mobile-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top:60px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .mobile-sidebar-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #FF2D95 0%, #7877FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+
+          .mobile-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .mobile-close-btn:hover {
+            background: rgba(255, 45, 149, 0.3);
+            transform: scale(1.1);
+          }
+
+          .mobile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+          }
+
+          .mobile-menu-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .mobile-menu-btn:hover {
+            background: rgba(255, 45, 149, 0.3);
+            transform: scale(1.1);
+          }
+
+          .task-list-header .header-main h2 {
+            display: none;
+          }
+
+          .mobile-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #FF2D95 0%, #7877FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+
+          .current-date-mobile {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+          }
+
+          .stats-container {
+            flex-direction: column;
+          }
+
+          .stat-card {
+            flex-direction: row;
+            justify-content: flex-start;
+          }
+
+          .upcoming-dates {
+            max-height: 40vh;
+            overflow-y: auto;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-sidebar-header,
+          .mobile-menu-btn,
+          .mobile-close-btn,
+          .current-date-mobile {
+            display: none;
           }
         }
       `}</style>
