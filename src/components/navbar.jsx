@@ -16,12 +16,12 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react"
 import { GiCheckMark } from "react-icons/gi"
-import { FaGoogle } from "react-icons/fa"
+import { MdLogin } from "react-icons/md";
 import TaskForm from './TaskForm.jsx'
 import LoginForm from './LoginForm.jsx'
 import SignUpForm from './SignUpForm.jsx'
 import ForgotPasswordForm from './ForgetPasswordForm.jsx'
-
+import { FiLogIn } from "react-icons/fi";
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
 
@@ -361,7 +361,7 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           
           <IconButton
             aria-label="Login"
-            icon={<FaGoogle />}
+            icon={<FiLogIn />}
             variant="outline"
             color={colors.textPrimary}
             borderColor={colors.border}
@@ -446,7 +446,7 @@ const Navbar = ({ onOpenTaskForm, onNavigateToLanding }) => {
           borderColor={colors.border}
           borderRadius="xl"
           boxShadow="0 25px 50px rgba(0, 0, 0, 0.5)"
-          maxW="40vw"
+          // maxW="40vw"
         >
           <ModalHeader 
             color={colors.textPrimary} 

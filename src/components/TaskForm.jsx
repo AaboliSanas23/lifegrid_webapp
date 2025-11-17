@@ -475,11 +475,11 @@ const TaskForm = ({ onClose, onSubmit }) => {
                   border: "1px solid",
                   borderColor: "pink.400",
                   boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
-                  outline: "none"
+                  outline: "none",
                 }}
                 width="100%"
                 fontSize={{ base: "sm", sm: "md" }}
-                height={{ base: "48px", sm: "auto" }}
+                // height={{ base: "48px", sm: "auto" }}
                 iconColor="white"
                 sx={{
                   '> option': {

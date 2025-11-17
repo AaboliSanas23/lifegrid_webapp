@@ -1212,7 +1212,7 @@ const PieChart = ({
 // Task Analytics Content Component with Tabs
 const TaskAnalyticsContent = ({ tasks, statsData, detailedStats }) => {
   const [selectedChart, setSelectedChart] = useState('completion');
-
+  const isMobile = window.innerWidth <= 768;
   const chartOptions = [
     {
       id: 'completion',
@@ -1261,8 +1261,9 @@ const TaskAnalyticsContent = ({ tasks, statsData, detailedStats }) => {
         return {};
     }
   };
-
+  
   const getAdditionalInfo = (chartId) => {
+
     switch(chartId) {
       case 'completion':
         const completionRate = statsData.totalTasks > 0 
@@ -1447,11 +1448,11 @@ const TaskAnalyticsContent = ({ tasks, statsData, detailedStats }) => {
     <div style={{ width: '100%', padding: '20px' }}>
       {/* Tab Navigation */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '12px',
-        marginBottom: '30px'
-      }}>
+  display: 'grid',
+  gridTemplateColumns:'repeat(2, 1fr)',
+  gap: '12px',
+  marginBottom: '30px'
+}}>
         {chartOptions.map((option) => (
           <motion.button
             key={option.id}
@@ -1505,17 +1506,17 @@ const TaskAnalyticsContent = ({ tasks, statsData, detailedStats }) => {
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}
         >
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '40px',
-            alignItems: 'center'
-          }}>
+                      <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap: '40px',
+              alignItems: 'center'
+            }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <PieChart
                 data={getChartData(selectedChart)}
                 colors={chartColors[selectedChart]}
-                size={280}
+               size={isMobile ? 200 : 280}
                 showPercentage={true}
                 showValues={true}
                 innerRadius={0.35}
@@ -2855,7 +2856,7 @@ const TaskListSide = ({
 
   return (
    <motion.div
-  className="task-list-side w-full sm:h-screen sm:pb-[100px]"
+  className="task-list-side w-full sm:h-screen sm:pb-[100px] md:mt-[80px] sm:mt-[0px]"
   // style={{
   //   height:"auto",
   //   padding: "20px",
@@ -3433,7 +3434,7 @@ const TaskListingPage = ({
   };
 
   return (
-    <div className="task-listing-container overflow-y-auto mt-60">
+    <div className="task-listing-container overflow-y-auto  ">
       <div className={`task-layout ${showMobileSidebar && isMobile ? 'mobile-sidebar-open' : ''}`}>
         {/* Left Side - Dashboard */}
         {/* Show sidebar on desktop always, on mobile only when showMobileSidebar is true */}
