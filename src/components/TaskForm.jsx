@@ -830,43 +830,41 @@ const TaskForm = ({ onClose, onSubmit }) => {
                       }}
                       placeholder="Item name"
                       padding={{ base: '12px', sm: '15px' }}
+                      
                       fontSize={{ base: "sm", sm: "md" }}
                       flex={{ sm: 2 }}
                     />
                     <InputGroup flex={{ sm: 1 }}>
-                      <InputLeftElement 
-                        paddingTop={{ base: '6px', sm: '8px' }} 
-                        pointerEvents="none"
-                        height="100%"
-                      >
-                        <LuDollarSign color="white" size={16} />
-                      </InputLeftElement>
-                      <NumberInput 
-                        value={item.price} 
-                        min={0}
-                        onChange={(valueString) => updateBudgetItem(index, "price", valueString)}
-                        width="100%"
-                      >
-                        <NumberInputField 
-                          pl={8}
-                          bg="transparent"
-                          border="1px solid"
-                          borderColor={(Number(item.price) <= 0 && errors.budgetItems) ? "red.500" : "gray.600"}
-                          color="white"
-                          _hover={{
-                            borderColor: (Number(item.price) <= 0 && errors.budgetItems) ? "red.400" : "gray.400",
-                          }}
-                          _focus={{
-                            border: "1px solid",
-                            borderColor: "pink.400",
-                            boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
-                            outline: "none"
-                          }}
-                          padding={{ base: '12px', sm: '15px' }}
-                          fontSize={{ base: "sm", sm: "md" }}
-                        />
-                      </NumberInput>
-                    </InputGroup>
+  {/* <InputLeftElement pointerEvents="none">
+    <LuDollarSign color="white" size={16} />
+  </InputLeftElement> */}
+
+  <NumberInput
+    value={item.price}
+    min={0}
+    onChange={(valueString) => updateBudgetItem(index, "price", valueString)}
+    width="100%"
+  >
+    <NumberInputField
+      pl="32px"   // <-- ensures icon + input stay inline
+      bg="transparent"
+      border="1px solid"
+      borderColor={(Number(item.price) <= 0 && errors.budgetItems) ? "red.500" : "gray.600"}
+      color="white"
+      _hover={{
+        borderColor: (Number(item.price) <= 0 && errors.budgetItems) ? "red.400" : "gray.400",
+      }}
+      _focus={{
+        border: "1px solid",
+        borderColor: "pink.400",
+        boxShadow: "0 0 10px rgba(189, 8, 86, 0.3)",
+        outline: "none"
+      }}
+      padding={{ base: '12px', sm: '15px' }}
+      fontSize={{ base: "sm", sm: "md" }}
+    />
+  </NumberInput>
+</InputGroup>
                     <IconButton
                       icon={<LuTrash2 color="white" size={16} />}
                       onClick={() => removeBudgetItem(index)}
